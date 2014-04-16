@@ -14,14 +14,11 @@ module.exports = (grunt) ->
             coffee_jasmine:
                 files: ['test/jasmine/coffee/**/**.coffee']
                 tasks: ["coffee-compile-jasmine"]
-            coffee_harness:
-                files: ['test/harness/coffee/**/**.coffee']
-                tasks: ["coffee-compile-harness"]
             js_requireConfig:
                 files: ["app/js/requireConfig.js", "app/js/main.js", "test/jasmine/SpecRunner.js"]
-                tasks: ["concat:main", "concat:jasmine", "concat:harness"]
+                tasks: ["concat:main", "concat:jasmine"]
             js:
-                files: ["app/js/**/**.js", "test/jasmine/js/**/**.js", "cola/**/**.js"]
+                files: ["app/js/**/**.js", "test/jasmine/js/**/**.js"]
                 options:
                     livereload: true
 
@@ -122,9 +119,6 @@ module.exports = (grunt) ->
             jasmine:
                 src: ["app/js/requireConfig.js", "test/jasmine/js/SpecRunner.js"]
                 dest: "test/jasmine/js/SpecRunner_with_require_config.js"
-            harness:
-                src: ["app/js/requireConfig.js", "test/harness/js/main.js"]
-                dest: "test/harness/js/main.js"
 
 
     grunt.loadNpmTasks "grunt-contrib-watch"
@@ -142,7 +136,6 @@ module.exports = (grunt) ->
     # compilation
     grunt.registerTask "coffee-compile-app", ["newer:coffee:app"]
     grunt.registerTask "coffee-compile-jasmine", ["newer:coffee:jasmine"]
-    grunt.registerTask "coffee-compile-harness", ["newer:coffee:harness"]
 
     grunt.registerTask "server", ["configureRewriteRules", "connect"]
     
