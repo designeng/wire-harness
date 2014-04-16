@@ -1,6 +1,9 @@
+
+connectMW = require(require("path").resolve("tasks", "connectMW.coffee"))
+
 module.exports = (grunt) ->
 
-    port = 9123
+    port = 7912
   
     # Project configuration.
     grunt.initConfig
@@ -11,9 +14,12 @@ module.exports = (grunt) ->
             coffee_jasmine:
                 files: ['test/jasmine/coffee/**/**.coffee']
                 tasks: ["coffee-compile-jasmine"]
+            coffee_harness:
+                files: ['test/harness/coffee/**/**.coffee']
+                tasks: ["coffee-compile-harness"]
             js_requireConfig:
                 files: ["app/js/requireConfig.js", "app/js/main.js", "test/jasmine/SpecRunner.js"]
-                tasks: ["concat:main", "concat:jasmine"]
+                tasks: ["concat:main", "concat:jasmine", "concat:harness"]
             js:
                 files: ["app/js/**/**.js", "test/jasmine/js/**/**.js", "cola/**/**.js"]
                 options:
@@ -74,6 +80,18 @@ module.exports = (grunt) ->
                 options:
                     port: port
                     base: '.'
+                    middleware: (connect, options) ->
+                        return [
+                            connectMW.getAllHarness
+                            connectMW.folderMount(connect, options.base)
+                        ]
+                rules:
+                    "^/test/har/$" : "/har/"
+
+        # make it work?
+        configureRewriteRules:
+            options:
+                rulesProvider: 'connect.server.rules'
 
         requirejs:
             compile:
@@ -104,6 +122,9 @@ module.exports = (grunt) ->
             jasmine:
                 src: ["app/js/requireConfig.js", "test/jasmine/js/SpecRunner.js"]
                 dest: "test/jasmine/js/SpecRunner_with_require_config.js"
+            harness:
+                src: ["app/js/requireConfig.js", "test/harness/js/main.js"]
+                dest: "test/harness/js/main.js"
 
 
     grunt.loadNpmTasks "grunt-contrib-watch"
@@ -121,9 +142,9 @@ module.exports = (grunt) ->
     # compilation
     grunt.registerTask "coffee-compile-app", ["newer:coffee:app"]
     grunt.registerTask "coffee-compile-jasmine", ["newer:coffee:jasmine"]
-    grunt.registerTask "coffee-compile-cola", ["newer:coffee:cola"]
+    grunt.registerTask "coffee-compile-harness", ["newer:coffee:harness"]
 
-    grunt.registerTask "server", ["connect"]
+    grunt.registerTask "server", ["configureRewriteRules", "connect"]
     
     grunt.registerTask 'build', ["prebuild", "rewriteIndexAndRJSConfig", "concat:prebuild", "requirejs", "afterbuild", "default"]
     grunt.registerTask 'prebuild', ["copy:app"]
