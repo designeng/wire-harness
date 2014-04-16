@@ -1,0 +1,26 @@
+{
+  "name": "wire-requirejs",
+  "version": "0.0.0",
+  "dependencies": {
+    "when": "~2.1.1",
+    "wire": "~0.10.0",
+    "meld": "~1.3.0",
+    "cola": "~0.1.6",
+    "rest": "latest",
+    "requirejs": "latest",
+    "backbone": "git://github.com/amdjs/backbone.git",
+    "marionette": "latest",
+    "text": "latest",
+    "Backbone.ModelBinder": "~1.0.5",
+    "listenTo": "git://github.com/designeng/listenTo.git",
+    "underscore.string": "~2.3.3",
+    "requirejs-i18n": "~2.0.4",
+    "requirejs-domready": "~2.0.1",
+    "require-css": "~0.1.2",
+    "backbone.wreqr": "~1.2.0",
+    "backbone.babysitter": "~0.1.1"
+  },
+  "resolutions": {
+    "when": "~3"
+  }
+}
