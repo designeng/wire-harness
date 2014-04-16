@@ -1,4 +1,4 @@
-wire-requirejs
+Test harness for wire project
 ==============
 
-wire-requirejs integration
+It should be usefull to have test harness auto-loader
