@@ -4,17 +4,43 @@
 
 define [
     "when"
+    "wire/lib/connection"
     "marionette"
     "underscore"
     "core/bootApp"
-], (When, Marionette, _, app) ->
+], (When, connection, Marionette, _, app) ->
+
+    WhenAll = When.all
 
     class Normalized extends Marionette.Layout
         template: "<div/>"
         onRender: ->
             @$el.append(Marionette.getOption @, "node")
 
+    copyOwnProps = () ->
+        i = 0
+        dst = {}
+        len = arguments.length
+        while i < len
+            src = arguments[i]
+            if src
+                for p of src
+                    dst[p] = src[p]  if src.hasOwnProperty(p)
+            i++
+        return dst
+
+
+    initBindOptions = (incomingOptions, pluginOptions, resolver) ->
+        if resolver.isRef(incomingOptions)
+            incomingOptions = { in: incomingOptions }
+
+        options = copyOwnProps(incomingOptions, pluginOptions)
+        return options
+
+
     return (options) ->
+
+        connections = []
 
         rootViewDeferred = When.defer()
 
@@ -24,7 +50,7 @@ define [
                 view = new Normalized({node: view})
             return view
 
-        doRenderAsPage = (facet, options, wire) ->
+        doRenderAsRoot = (facet, options, wire) ->
             view = facet.target
 
             view = normalizeView view
@@ -50,14 +76,35 @@ define [
                     throw "rootView does not resolved, did you assigned renderAsRoot component?"
             )
 
+        doAfterRenderAsRootFacet = (facet, options, wire) ->
+            target = facet.target
+
+            return When(rootViewDeferred.promise).then(
+                    () ->
+                        When(wire(initBindOptions(facet.options, options, wire.resolver)), (options) ->
+                            owner = options.in
+                            owner[options.invoke](target)
+                        )
+                )
+
         renderAsRootFacet = (resolver, facet, wire) ->
-            resolver.resolve(doRenderAsPage(facet, options, wire))
+            resolver.resolve(doRenderAsRoot(facet, options, wire))
 
         renderAsChildFacet = (resolver, facet, wire) ->
             resolver.resolve(doRenderAsChild(facet, options, wire))
+
+        afterRenderAsRootFacet = (resolver, facet, wire) ->
+            resolver.resolve(doAfterRenderAsRootFacet(facet, options, wire))
+
+        context:
+            destroy: (resolver) ->
+                connection.removeAll(connections)
+                resolver.resolve()
 
         facets: 
             renderAsRoot:
                 ready: renderAsRootFacet
             renderAsChild:
                 ready: renderAsChildFacet
+            afterRenderAsRoot:
+                "ready:after": afterRenderAsRootFacet

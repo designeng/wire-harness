@@ -66,9 +66,13 @@ require.config({
       main: "text",
       location: "../../bower_components/text"
     }, {
-      name: "hbs",
-      main: "backbone.marionette.hbs",
-      location: "../../bower_components/backbone.marionette.hbs"
+      name: "hbars",
+      main: "hbars",
+      location: "../../bower_components/hbars"
+    }, {
+      name: "handlebars",
+      main: "handlebars",
+      location: "../../bower_components/handlebars"
     }, {
       name: "i18n",
       main: "i18n",
@@ -107,6 +111,9 @@ require.config({
     },
     "underscore.string": {
       deps: ["underscore"]
+    },
+    "handlebars": {
+      exports: "Handlebars"
     }
   },
   paths: {
