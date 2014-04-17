@@ -4,7 +4,7 @@ grunt = require "grunt"
 
 ConnectMW = {}
 ConnectMW.options = 
-    harness: "harness"
+    harness: "service/harness"
     _baseDir: "app/coffee"
 
 templatePathes = (path) ->

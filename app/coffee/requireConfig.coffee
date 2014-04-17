@@ -85,6 +85,11 @@ require.config
             location: "../../bower_components/text"
         },
         {   
+            name: "hbs"
+            main: "backbone.marionette.hbs"
+            location: "../../bower_components/backbone.marionette.hbs"
+        },
+        {   
             name: "i18n"
             main: "i18n"
             location: "../../bower_components/requirejs-i18n"

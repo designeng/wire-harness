@@ -12,3 +12,4 @@ define
                 # "sample"   : "editViewSpec"
                 "sample"   : "sample-app/main"
                 "else"  : "modelToViewInjectionSpec"
+                "harness"   : "modules/harness/harnessSpec"

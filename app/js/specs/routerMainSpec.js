@@ -5,7 +5,8 @@ define({
       routes: {
         "main": "childSpec",
         "sample": "sample-app/main",
-        "else": "modelToViewInjectionSpec"
+        "else": "modelToViewInjectionSpec",
+        "harness": "modules/harness/harnessSpec"
       }
     }
   }
