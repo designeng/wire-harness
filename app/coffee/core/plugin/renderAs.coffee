@@ -45,6 +45,25 @@ define [
         rootViewDeferred = When.defer()
         childViewDeferred = When.defer()
 
+        invokeRef = (target, invoke, wire) ->                
+
+            invokeSplitted = invoke.$ref.split(".")
+            objectRef = invokeSplitted[0]
+            method = invokeSplitted[1]
+
+            if invoke = wire.resolver.isRef(invoke)
+                objectPromise = wire.resolveRef(objectRef)
+                When(objectPromise, (obj) ->
+                    if _.isObject obj and method and obj[method]
+                        obj[method](target)
+                    else if _.isFunction obj
+                        obj(target)
+                    else if _.isObject obj and !method
+                        throw "method is not specified in object"
+                )
+            else
+                console.log "nothing to invoke - not reference"
+
         # TODO: it must be adapted for other browsers
         normalizeView = (view) ->
             if !view.render and view instanceof HTMLElement
@@ -80,25 +99,15 @@ define [
 
         doAfterRenderAsRootFacet = (facet, options, wire) ->
             target = facet.target
+            invoke = facet.options.invoke
 
-            return When(rootViewDeferred.promise).then(
-                    () ->
-                        When(wire(initBindOptions(facet.options, options, wire.resolver)), (options) ->
-                            owner = options.in
-                            owner[options.invoke](target)
-                        )
-                )
+            return When(rootViewDeferred.promise).then(invokeRef(target, invoke, wire))
 
         doAfterRenderAsChildFacet = (facet, options, wire) ->
             target = facet.target
+            invoke = facet.options.invoke
 
-            return When(childViewDeferred.promise).then(
-                    () ->
-                        When(wire(initBindOptions(facet.options, options, wire.resolver)), (options) ->
-                            owner = options.in
-                            owner[options.invoke](target)
-                        )
-                )
+            return When(childViewDeferred.promise).then(invokeRef(target, invoke, wire))
 
         renderAsRootFacet = (resolver, facet, wire) ->
             resolver.resolve(doRenderAsRoot(facet, options, wire))

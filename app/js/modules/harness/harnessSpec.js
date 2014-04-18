@@ -11,9 +11,8 @@ define({
     },
     renderAsChild: true,
     afterRenderAsChild: {
-      invoke: "afterChildLoad",
-      "in": {
-        $ref: 'controller'
+      invoke: {
+        $ref: 'controller.afterChildLoad'
       }
     }
   },
@@ -28,9 +27,8 @@ define({
     },
     renderAsRoot: true,
     afterRenderAsRoot: {
-      invoke: "loadHarness",
-      "in": {
-        $ref: 'controller'
+      invoke: {
+        $ref: 'controller.loadHarness'
       }
     }
   },

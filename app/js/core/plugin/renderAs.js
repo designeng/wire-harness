@@ -50,10 +50,30 @@ define(["when", "wire/lib/connection", "marionette", "underscore", "core/bootApp
     return options;
   };
   return function(options) {
-    var afterRenderAsChildFacet, afterRenderAsRootFacet, childViewDeferred, connections, doAfterRenderAsChildFacet, doAfterRenderAsRootFacet, doRenderAsChild, doRenderAsRoot, normalizeView, renderAsChildFacet, renderAsRootFacet, rootViewDeferred;
+    var afterRenderAsChildFacet, afterRenderAsRootFacet, childViewDeferred, connections, doAfterRenderAsChildFacet, doAfterRenderAsRootFacet, doRenderAsChild, doRenderAsRoot, invokeRef, normalizeView, renderAsChildFacet, renderAsRootFacet, rootViewDeferred;
     connections = [];
     rootViewDeferred = When.defer();
     childViewDeferred = When.defer();
+    invokeRef = function(target, invoke, wire) {
+      var invokeSplitted, method, objectPromise, objectRef;
+      invokeSplitted = invoke.$ref.split(".");
+      objectRef = invokeSplitted[0];
+      method = invokeSplitted[1];
+      if (invoke = wire.resolver.isRef(invoke)) {
+        objectPromise = wire.resolveRef(objectRef);
+        return When(objectPromise, function(obj) {
+          if (_.isObject(obj && method && obj[method])) {
+            return obj[method](target);
+          } else if (_.isFunction(obj)) {
+            return obj(target);
+          } else if (_.isObject(obj && !method)) {
+            throw "method is not specified in object";
+          }
+        });
+      } else {
+        return console.log("nothing to invoke - not reference");
+      }
+    };
     normalizeView = function(view) {
       if (!view.render && view instanceof HTMLElement) {
         view = new Normalized({
@@ -83,26 +103,16 @@ define(["when", "wire/lib/connection", "marionette", "underscore", "core/bootApp
       });
     };
     doAfterRenderAsRootFacet = function(facet, options, wire) {
-      var target;
+      var invoke, target;
       target = facet.target;
-      return When(rootViewDeferred.promise).then(function() {
-        return When(wire(initBindOptions(facet.options, options, wire.resolver)), function(options) {
-          var owner;
-          owner = options["in"];
-          return owner[options.invoke](target);
-        });
-      });
+      invoke = facet.options.invoke;
+      return When(rootViewDeferred.promise).then(invokeRef(target, invoke, wire));
     };
     doAfterRenderAsChildFacet = function(facet, options, wire) {
-      var target;
+      var invoke, target;
       target = facet.target;
-      return When(childViewDeferred.promise).then(function() {
-        return When(wire(initBindOptions(facet.options, options, wire.resolver)), function(options) {
-          var owner;
-          owner = options["in"];
-          return owner[options.invoke](target);
-        });
-      });
+      invoke = facet.options.invoke;
+      return When(childViewDeferred.promise).then(invokeRef(target, invoke, wire));
     };
     renderAsRootFacet = function(resolver, facet, wire) {
       return resolver.resolve(doRenderAsRoot(facet, options, wire));
