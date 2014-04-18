@@ -47,6 +47,9 @@ define({
   getBaseUrl: {
     module: "core/util/service/config/getBaseUrl"
   },
+  getRequireJsConfig: {
+    module: "core/util/service/config/getRequireJsConfig"
+  },
   controller: {
     create: {
       module: "modules/harness/controller"
@@ -56,10 +59,16 @@ define({
       getBaseUrl: {
         $ref: "getBaseUrl"
       },
+      getRequireJsConfig: {
+        $ref: "getRequireJsConfig"
+      },
       harnessUrl: "js/controls/tablecontrol/test/harness.html"
     },
     connect: {
       'testsCollection.onEdit': 'onItemClick'
+    },
+    ready: {
+      "onReady": {}
     }
   }
 });

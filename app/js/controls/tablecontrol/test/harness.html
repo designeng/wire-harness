@@ -27,121 +27,19 @@
 </head>
 <body class="container">
 
-    <!--
-        The HTML/CSS designer can add simple buttons with DOM0 event
-        handlers or other things to aid development.  We could have used
-        wire.js to create these buttons, but we used simple HTML instead
-        to demonstrate that mere mortals can work with harnesses.
-     -->
-
     <button onclick="setGameState('awaiting-initial-selection')">awaiting initial selection</button>
     <button onclick="setGameState('awaiting-final-selection')">awaiting final selection</button>
     <button onclick="setGameState('won')">won</button>
     <button onclick="setGameState('lost')">lost</button>
 
-    <script>
-        /*
-         * Just a simple function that an HTML/CSS designer could create to
-         * toggle OOCSS state to test their view component.
-         */
-        function setGameState (state) {
-            document.body.className = state + ' container';
-        }
-    </script>
 
-    <!--
-        This is the root node of the View Component we're testing.
-        The html will be rendered via the wire.js spec below.  Aside
-        from the buttons used for "manual testing", harnesses
-        typically only have one dom node in the body!
-    -->
-
-    <div class="instructions"></div>
+    <div class="root"></div>
 
 </body>
 <script>
 
-    /**
-     * This is boilerplate to interact with a parent document that launches
-     * this harness (either as an iframe or as a new browser tab).
-     * This harness must be called with the name of a function to call
-     * on the parent window.  The name is passed as the contents of
-     * the document fragment (hash) of the document url.  (e.g.
-     * "harness.html#callbackFuncName")  The parent then launches and
-     * configures a minimal testing environment, including curl.js
-     * and wire.js before returning control to this harness.
-     */
-    var require;
-    (function () {
-        var cbName;
-        try {
-            // find callback on parent window
-            // cbName = document.location.hash.substr(1);
-            // console.log("____cbName", cbName)
-            // if (!cbName) throw new Error('callback not found in url.');
-            // if (!window.parent) throw new Error('no parent window found.');
-            // if (!window.parent[cbName]) throw new Error('no callback found.');
-
-            // call parent, passing a callback
-            // window.parent[cbName](function () {
-            //     // launch wire.js and initialize the environment
-            //     curl(['wire'], runTests);
-            // });
-            require(["/app/js/specs/childSpec.js"], function (spec){
-                alert(spec)
-            })
-        }
-        catch (ex) {
-            // fail loudly
-            console.error(ex);
-            throw ex;
-        }
-    }());
-
-    /**
-     * Initialize environment and run tests.
-     * @param wire {Function} wire.js's wiring function
-     * @description
-     * This is the function that is run when the javascript environment is
-     * ready.  Note that wire.js handles domReady internally so there's no
-     * reason to specify it directly.  You should load and wire a spec here
-     * to initialize the harness.  You can put unit tests and/or functional
-     * tests in here.
-     */
     function runTests (wire) {
-
-        wire({
-
-            /* Get a reference to the root of our DOM environment. */
-            instructionsNode: { $ref: 'dom.first!.instructions', at: document.body },
-
-            /*
-                Render the view component (via its spec) onto
-                the dom node that matches the css query ".instructions"
-                under the 'gameView' node (our root).
-             */
-            instructionsView: {
-                wire: {
-                    spec: 'app/instructions/spec',
-                    provide: {
-                        $root: { $ref: 'instructionsNode' }
-                    }
-                }
-            },
-
-            /* Pull in some base styling. */
-            css: [
-                { module: 'css!theme/base.css' }
-            ],
-
-            /* Load the wire plugins we're using. */
-            plugins: [
-                { module: 'wire/debug' },
-                { module: 'wire/dom' },
-                { module: 'wire/dom/render' }
-            ]
-        });
-
+        wire();
     }
 
     // TODO: also put unit and/or functional tests here
