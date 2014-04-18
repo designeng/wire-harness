@@ -50,9 +50,10 @@ define(["when", "wire/lib/connection", "marionette", "underscore", "core/bootApp
     return options;
   };
   return function(options) {
-    var afterRenderAsRootFacet, connections, doAfterRenderAsRootFacet, doRenderAsChild, doRenderAsRoot, normalizeView, renderAsChildFacet, renderAsRootFacet, rootViewDeferred;
+    var afterRenderAsChildFacet, afterRenderAsRootFacet, childViewDeferred, connections, doAfterRenderAsChildFacet, doAfterRenderAsRootFacet, doRenderAsChild, doRenderAsRoot, normalizeView, renderAsChildFacet, renderAsRootFacet, rootViewDeferred;
     connections = [];
     rootViewDeferred = When.defer();
+    childViewDeferred = When.defer();
     normalizeView = function(view) {
       if (!view.render && view instanceof HTMLElement) {
         view = new Normalized({
@@ -75,7 +76,8 @@ define(["when", "wire/lib/connection", "marionette", "underscore", "core/bootApp
       return When(rootViewDeferred.promise).then(function(rootView) {
         $("<div class='" + facet.id + "Wrapper'></div>").appendTo(rootView.el);
         rootView.addRegion(facet.id + "Region", "." + facet.id + "Wrapper");
-        return rootView[facet.id + "Region"].show(childView);
+        rootView[facet.id + "Region"].show(childView);
+        return childViewDeferred.resolve(childView);
       }).otherwise(function(error) {
         throw "rootView does not resolved, did you assigned renderAsRoot component?";
       });
@@ -84,6 +86,17 @@ define(["when", "wire/lib/connection", "marionette", "underscore", "core/bootApp
       var target;
       target = facet.target;
       return When(rootViewDeferred.promise).then(function() {
+        return When(wire(initBindOptions(facet.options, options, wire.resolver)), function(options) {
+          var owner;
+          owner = options["in"];
+          return owner[options.invoke](target);
+        });
+      });
+    };
+    doAfterRenderAsChildFacet = function(facet, options, wire) {
+      var target;
+      target = facet.target;
+      return When(childViewDeferred.promise).then(function() {
         return When(wire(initBindOptions(facet.options, options, wire.resolver)), function(options) {
           var owner;
           owner = options["in"];
@@ -100,6 +113,9 @@ define(["when", "wire/lib/connection", "marionette", "underscore", "core/bootApp
     afterRenderAsRootFacet = function(resolver, facet, wire) {
       return resolver.resolve(doAfterRenderAsRootFacet(facet, options, wire));
     };
+    afterRenderAsChildFacet = function(resolver, facet, wire) {
+      return resolver.resolve(doAfterRenderAsChildFacet(facet, options, wire));
+    };
     return {
       context: {
         destroy: function(resolver) {
@@ -109,13 +125,16 @@ define(["when", "wire/lib/connection", "marionette", "underscore", "core/bootApp
       },
       facets: {
         renderAsRoot: {
-          ready: renderAsRootFacet
+          "ready:before": renderAsRootFacet
         },
         renderAsChild: {
-          ready: renderAsChildFacet
+          "ready:before": renderAsChildFacet
         },
         afterRenderAsRoot: {
           "ready:after": afterRenderAsRootFacet
+        },
+        afterRenderAsChild: {
+          "ready:after": afterRenderAsChildFacet
         }
       }
     };

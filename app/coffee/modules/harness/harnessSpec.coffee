@@ -8,6 +8,17 @@ define
         'wire/debug'
     ]
 
+    harnessSideBar:
+        render:
+            template:
+                module: 'text!modules/harness/sidebar.html'
+            css: 
+                module: 'css!modules/harness/sidebarStructure.css'
+        renderAsChild: true
+        afterRenderAsChild:      
+            invoke: "afterChildLoad"
+            in: {$ref: 'controller'}
+
     harnessPlayground:
         render:
             template:

@@ -43,6 +43,7 @@ define [
         connections = []
 
         rootViewDeferred = When.defer()
+        childViewDeferred = When.defer()
 
         # TODO: it must be adapted for other browsers
         normalizeView = (view) ->
@@ -70,6 +71,7 @@ define [
                     $("<div class='#{facet.id}Wrapper'></div>").appendTo(rootView.el)
                     rootView.addRegion facet.id + "Region", ".#{facet.id}Wrapper"
                     rootView[facet.id + "Region"].show childView
+                    childViewDeferred.resolve(childView)
             ).otherwise(
                 # does not work as error throw
                 (error) ->
@@ -87,6 +89,17 @@ define [
                         )
                 )
 
+        doAfterRenderAsChildFacet = (facet, options, wire) ->
+            target = facet.target
+
+            return When(childViewDeferred.promise).then(
+                    () ->
+                        When(wire(initBindOptions(facet.options, options, wire.resolver)), (options) ->
+                            owner = options.in
+                            owner[options.invoke](target)
+                        )
+                )
+
         renderAsRootFacet = (resolver, facet, wire) ->
             resolver.resolve(doRenderAsRoot(facet, options, wire))
 
@@ -96,6 +109,9 @@ define [
         afterRenderAsRootFacet = (resolver, facet, wire) ->
             resolver.resolve(doAfterRenderAsRootFacet(facet, options, wire))
 
+        afterRenderAsChildFacet = (resolver, facet, wire) ->
+            resolver.resolve(doAfterRenderAsChildFacet(facet, options, wire))
+
         context:
             destroy: (resolver) ->
                 connection.removeAll(connections)
@@ -103,8 +119,10 @@ define [
 
         facets: 
             renderAsRoot:
-                ready: renderAsRootFacet
+                "ready:before": renderAsRootFacet
             renderAsChild:
-                ready: renderAsChildFacet
+                "ready:before": renderAsChildFacet
             afterRenderAsRoot:
                 "ready:after": afterRenderAsRootFacet
+            afterRenderAsChild:
+                "ready:after": afterRenderAsChildFacet

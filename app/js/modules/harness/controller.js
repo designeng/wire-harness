@@ -19,7 +19,12 @@ define(["require", "when", "jquery"], function(require, When, $) {
     };
 
     HarnessController.prototype.loadHarness = function(root) {
-      return $(root).find(".playground").attr("src", this.harnessUrl);
+      $(root).find(".playground").attr("src", this.harnessUrl);
+      return console.log("________________loadHarness");
+    };
+
+    HarnessController.prototype.afterChildLoad = function(target) {
+      return console.log("_____afterChildLoad", target);
     };
 
     HarnessController.prototype.loadAMDLoader = function(harness, cb) {

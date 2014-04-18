@@ -29,6 +29,10 @@ define [
 
         loadHarness: (root) ->
             $(root).find(".playground").attr("src", @harnessUrl)
+            console.log "________________loadHarness"
+
+        afterChildLoad: (target) ->
+            console.log "_____afterChildLoad", target
 
 
         # Asynchronously loads require.js (curl.js) and calls back when done.
