@@ -58,10 +58,10 @@ define(["when", "wire/lib/connection", "marionette", "underscore", "core/bootApp
       var afterRender, view;
       view = facet.target;
       afterRender = facet.options.afterRender;
+      view = normalizeView(view);
       if (afterRender) {
         When(rootViewDeferred.promise).then(invocation(view, afterRender, wire));
       }
-      view = normalizeView(view);
       app.renderAsRoot(view);
       return rootViewDeferred.resolve(view);
     };

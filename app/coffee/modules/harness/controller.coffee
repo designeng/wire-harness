@@ -28,8 +28,7 @@ define [
             # @loadAMDLoader()
 
         loadHarness: (root) ->
-            $(root).find(".playground").attr("src", @harnessUrl)
-            console.log "________________loadHarness", root
+            root.$el.find(".playground").attr("src", @harnessUrl)
 
         afterChildLoad: (target) ->
             console.log "_____afterChildLoad", target

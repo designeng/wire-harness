@@ -29,7 +29,7 @@ define
             afterRender: {$ref: 'controller.loadHarness'}
 
     controller:
-        create: 
+        create:
             module: "modules/harness/controller"
         properties:
             global: window
