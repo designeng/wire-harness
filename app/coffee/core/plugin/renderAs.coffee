@@ -1,6 +1,7 @@
 # renderAsRoot plugin
 
 # render target in application page region
+# if afterRender is defined in facet options, reference will be invoked with normalized view as argument
 
 define [
     "when"
