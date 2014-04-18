@@ -4,19 +4,32 @@ define
         'wire/dom'
         'wire/dom/render'
         'wire/on'
+        'wire/connect'
+        "cola"
         "core/plugin/renderAs"
         'wire/debug'
     ]
 
-    harnessSideBar:
+    testsCollection:
+        wire: 'modules/harness/collection/spec'
+
+    harnessList:
         render:
             template:
                 module: 'text!modules/harness/sidebar.html'
             css: 
                 module: 'css!modules/harness/sidebarStructure.css'
+        on:
+            'click:.item': 'testsCollection.edit'
 
         renderAsChild:
             afterRender: {$ref: 'controller.afterChildLoad'}
+
+        bind:
+            to:
+                $ref: 'testsCollection'
+            bindings:
+                url: '.url'
 
     harnessPlayground:
         render:
@@ -28,14 +41,15 @@ define
         renderAsRoot:
             afterRender: {$ref: 'controller.loadHarness'}
 
+    getBaseUrl:
+        module: "core/util/service/config/getBaseUrl"
+
     controller:
         create:
             module: "modules/harness/controller"
         properties:
             global: window
+            getBaseUrl: {$ref: "getBaseUrl"}
             harnessUrl: "js/controls/tablecontrol/test/harness.html"
-            harnessPlayground: 'harnessPlayground'
-
-
-        ready:
-            "onReady": []
+        connect:
+            'testsCollection.onEdit': 'onItemClick'

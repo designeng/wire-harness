@@ -13,22 +13,26 @@ define [
         harnessUrl: undefined
 
         # @injected
-        harnessPlayground: undefined
+        getBaseUrl: undefined
 
         amdLoaderUrl: "/bower_components/requirejs/require.js"
 
         callbackKey: 'harnessCallback'
 
-        onReady: () ->
-            console.log "READY"
+        onItemClick: (item) ->
+            @playground.attr("src", @getBaseUrl() + item.url)
 
-            console.log "URL::", @harnessUrl
+        onReady: () ->
+            # console.log "READY"
+
+            # console.log "URL::", @harnessUrl
 
             # @loadHarness(@harnessUrl, document.body)
             # @loadAMDLoader()
 
-        loadHarness: (root) ->
-            root.$el.find(".playground").attr("src", @harnessUrl)
+        loadHarness: (playground) ->
+            @playground = playground.$el.find(".playground")
+            @playground.attr("src", @harnessUrl)
 
         afterChildLoad: (target) ->
             console.log "_____afterChildLoad", target
@@ -70,10 +74,3 @@ define [
         #             # curl(commonCfg)
         #             # @loaded()
         #             # cb()
-
-
-
-        # Mark document as "loaded", meaning we loaded a harness.
-
-        loaded: () ->
-            document.documentElement.className += ' loaded'

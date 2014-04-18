@@ -7,19 +7,21 @@ define(["require", "when", "jquery"], function(require, When, $) {
 
     HarnessController.prototype.harnessUrl = void 0;
 
-    HarnessController.prototype.harnessPlayground = void 0;
+    HarnessController.prototype.getBaseUrl = void 0;
 
     HarnessController.prototype.amdLoaderUrl = "/bower_components/requirejs/require.js";
 
     HarnessController.prototype.callbackKey = 'harnessCallback';
 
-    HarnessController.prototype.onReady = function() {
-      console.log("READY");
-      return console.log("URL::", this.harnessUrl);
+    HarnessController.prototype.onItemClick = function(item) {
+      return this.playground.attr("src", this.getBaseUrl() + item.url);
     };
 
-    HarnessController.prototype.loadHarness = function(root) {
-      return root.$el.find(".playground").attr("src", this.harnessUrl);
+    HarnessController.prototype.onReady = function() {};
+
+    HarnessController.prototype.loadHarness = function(playground) {
+      this.playground = playground.$el.find(".playground");
+      return this.playground.attr("src", this.harnessUrl);
     };
 
     HarnessController.prototype.afterChildLoad = function(target) {
@@ -37,10 +39,6 @@ define(["require", "when", "jquery"], function(require, When, $) {
       script.src = this.amdLoaderUrl;
       console.log("_____@amdLoaderUrl", this.amdLoaderUrl);
       return (doc.head || doc.getElementsByTagName('head')[0]).appendChild(script);
-    };
-
-    HarnessController.prototype.loaded = function() {
-      return document.documentElement.className += ' loaded';
     };
 
     return HarnessController;

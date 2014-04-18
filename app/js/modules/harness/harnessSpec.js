@@ -1,6 +1,9 @@
 define({
-  $plugins: ['wire/dom', 'wire/dom/render', 'wire/on', "core/plugin/renderAs", 'wire/debug'],
-  harnessSideBar: {
+  $plugins: ['wire/dom', 'wire/dom/render', 'wire/on', 'wire/connect', "cola", "core/plugin/renderAs", 'wire/debug'],
+  testsCollection: {
+    wire: 'modules/harness/collection/spec'
+  },
+  harnessList: {
     render: {
       template: {
         module: 'text!modules/harness/sidebar.html'
@@ -9,9 +12,20 @@ define({
         module: 'css!modules/harness/sidebarStructure.css'
       }
     },
+    on: {
+      'click:.item': 'testsCollection.edit'
+    },
     renderAsChild: {
       afterRender: {
         $ref: 'controller.afterChildLoad'
+      }
+    },
+    bind: {
+      to: {
+        $ref: 'testsCollection'
+      },
+      bindings: {
+        url: '.url'
       }
     }
   },
@@ -30,17 +44,22 @@ define({
       }
     }
   },
+  getBaseUrl: {
+    module: "core/util/service/config/getBaseUrl"
+  },
   controller: {
     create: {
       module: "modules/harness/controller"
     },
     properties: {
       global: window,
-      harnessUrl: "js/controls/tablecontrol/test/harness.html",
-      harnessPlayground: 'harnessPlayground'
+      getBaseUrl: {
+        $ref: "getBaseUrl"
+      },
+      harnessUrl: "js/controls/tablecontrol/test/harness.html"
     },
-    ready: {
-      "onReady": []
+    connect: {
+      'testsCollection.onEdit': 'onItemClick'
     }
   }
 });

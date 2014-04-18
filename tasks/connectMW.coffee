@@ -4,6 +4,7 @@ grunt = require "grunt"
 
 ConnectMW = {}
 ConnectMW.options = 
+    testHarness: "service/testharness"
     harness: "service/harness"
     _baseDir: "app/coffee"
 
@@ -17,8 +18,10 @@ ConnectMW.getAllHarness = (req, res, next) ->
 
     if (req.url).match new RegExp(ConnectMW.options.harness)
 
-        result = ""
-        files = []
+        count = 0
+
+        body = 
+            urls: []
 
         walk.walkSync __dirname + '/../app/coffee', (basedir, filename, stat) ->
 
@@ -26,9 +29,12 @@ ConnectMW.getAllHarness = (req, res, next) ->
 
                 baseDirChunk = basedir.split(ConnectMW.options._baseDir)[1]
                 url = baseDirChunk + "/" + filename
-                result += "<li data-url='" + url + "'>" + url + "</li>\n"
 
-        res.write result
+                body.urls.push {id: count, url: url}
+                count++
+
+        res.setHeader "Content-Type", "application/json; charset=utf-8"
+        res.write JSON.stringify body
         res.end()
 
     else

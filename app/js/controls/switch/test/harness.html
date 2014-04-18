@@ -36,8 +36,6 @@
 
     <button onclick="setGameState('awaiting-initial-selection')">awaiting initial selection</button>
     <button onclick="setGameState('awaiting-final-selection')">awaiting final selection</button>
-    <button onclick="setGameState('won')">won</button>
-    <button onclick="setGameState('lost')">lost</button>
 
     <script>
         /*
@@ -71,7 +69,7 @@
      * configures a minimal testing environment, including curl.js
      * and wire.js before returning control to this harness.
      */
-    var require;
+    var curl;
     (function () {
         var cbName;
         try {
