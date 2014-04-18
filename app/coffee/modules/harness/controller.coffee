@@ -29,7 +29,7 @@ define [
 
         loadHarness: (root) ->
             $(root).find(".playground").attr("src", @harnessUrl)
-            console.log "________________loadHarness"
+            console.log "________________loadHarness", root
 
         afterChildLoad: (target) ->
             console.log "_____afterChildLoad", target

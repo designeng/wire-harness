@@ -17,27 +17,6 @@ define [
         onRender: ->
             @$el.append(Marionette.getOption @, "node")
 
-    copyOwnProps = () ->
-        i = 0
-        dst = {}
-        len = arguments.length
-        while i < len
-            src = arguments[i]
-            if src
-                for p of src
-                    dst[p] = src[p]  if src.hasOwnProperty(p)
-            i++
-        return dst
-
-
-    initBindOptions = (incomingOptions, pluginOptions, resolver) ->
-        if resolver.isRef(incomingOptions)
-            incomingOptions = { in: incomingOptions }
-
-        options = copyOwnProps(incomingOptions, pluginOptions)
-        return options
-
-
     return (options) ->
 
         connections = []
@@ -45,7 +24,7 @@ define [
         rootViewDeferred = When.defer()
         childViewDeferred = When.defer()
 
-        invokeRef = (target, invoke, wire) ->                
+        invocation = (target, invoke, wire) ->                
 
             invokeSplitted = invoke.$ref.split(".")
             objectRef = invokeSplitted[0]
@@ -72,6 +51,10 @@ define [
 
         doRenderAsRoot = (facet, options, wire) ->
             view = facet.target
+            afterRender = facet.options.afterRender
+
+            if afterRender
+                When(rootViewDeferred.promise).then(invocation(view, afterRender, wire))
 
             view = normalizeView view
 
@@ -80,8 +63,12 @@ define [
 
         doRenderAsChild = (facet, options, wire) ->
             childView = facet.target
+            afterRender = facet.options.afterRender
 
             childView = normalizeView childView
+
+            if afterRender
+                When(childViewDeferred.promise).then(invocation(childView, afterRender, wire))
 
             return When(rootViewDeferred.promise).then(
                 (rootView) ->
@@ -97,29 +84,11 @@ define [
                     throw "rootView does not resolved, did you assigned renderAsRoot component?"
             )
 
-        doAfterRenderAsRootFacet = (facet, options, wire) ->
-            target = facet.target
-            invoke = facet.options.invoke
-
-            return When(rootViewDeferred.promise).then(invokeRef(target, invoke, wire))
-
-        doAfterRenderAsChildFacet = (facet, options, wire) ->
-            target = facet.target
-            invoke = facet.options.invoke
-
-            return When(childViewDeferred.promise).then(invokeRef(target, invoke, wire))
-
         renderAsRootFacet = (resolver, facet, wire) ->
             resolver.resolve(doRenderAsRoot(facet, options, wire))
 
         renderAsChildFacet = (resolver, facet, wire) ->
             resolver.resolve(doRenderAsChild(facet, options, wire))
-
-        afterRenderAsRootFacet = (resolver, facet, wire) ->
-            resolver.resolve(doAfterRenderAsRootFacet(facet, options, wire))
-
-        afterRenderAsChildFacet = (resolver, facet, wire) ->
-            resolver.resolve(doAfterRenderAsChildFacet(facet, options, wire))
 
         context:
             destroy: (resolver) ->
@@ -128,10 +97,6 @@ define [
 
         facets: 
             renderAsRoot:
-                "ready:before": renderAsRootFacet
+                ready: renderAsRootFacet
             renderAsChild:
-                "ready:before": renderAsChildFacet
-            afterRenderAsRoot:
-                "ready:after": afterRenderAsRootFacet
-            afterRenderAsChild:
-                "ready:after": afterRenderAsChildFacet
+                ready: renderAsChildFacet

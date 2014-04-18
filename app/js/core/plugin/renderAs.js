@@ -2,7 +2,7 @@ var __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 define(["when", "wire/lib/connection", "marionette", "underscore", "core/bootApp"], function(When, connection, Marionette, _, app) {
-  var Normalized, WhenAll, copyOwnProps, initBindOptions, _ref;
+  var Normalized, WhenAll, _ref;
   WhenAll = When.all;
   Normalized = (function(_super) {
     __extends(Normalized, _super);
@@ -21,40 +21,12 @@ define(["when", "wire/lib/connection", "marionette", "underscore", "core/bootApp
     return Normalized;
 
   })(Marionette.Layout);
-  copyOwnProps = function() {
-    var dst, i, len, p, src;
-    i = 0;
-    dst = {};
-    len = arguments.length;
-    while (i < len) {
-      src = arguments[i];
-      if (src) {
-        for (p in src) {
-          if (src.hasOwnProperty(p)) {
-            dst[p] = src[p];
-          }
-        }
-      }
-      i++;
-    }
-    return dst;
-  };
-  initBindOptions = function(incomingOptions, pluginOptions, resolver) {
-    var options;
-    if (resolver.isRef(incomingOptions)) {
-      incomingOptions = {
-        "in": incomingOptions
-      };
-    }
-    options = copyOwnProps(incomingOptions, pluginOptions);
-    return options;
-  };
   return function(options) {
-    var afterRenderAsChildFacet, afterRenderAsRootFacet, childViewDeferred, connections, doAfterRenderAsChildFacet, doAfterRenderAsRootFacet, doRenderAsChild, doRenderAsRoot, invokeRef, normalizeView, renderAsChildFacet, renderAsRootFacet, rootViewDeferred;
+    var childViewDeferred, connections, doRenderAsChild, doRenderAsRoot, invocation, normalizeView, renderAsChildFacet, renderAsRootFacet, rootViewDeferred;
     connections = [];
     rootViewDeferred = When.defer();
     childViewDeferred = When.defer();
-    invokeRef = function(target, invoke, wire) {
+    invocation = function(target, invoke, wire) {
       var invokeSplitted, method, objectPromise, objectRef;
       invokeSplitted = invoke.$ref.split(".");
       objectRef = invokeSplitted[0];
@@ -83,16 +55,24 @@ define(["when", "wire/lib/connection", "marionette", "underscore", "core/bootApp
       return view;
     };
     doRenderAsRoot = function(facet, options, wire) {
-      var view;
+      var afterRender, view;
       view = facet.target;
+      afterRender = facet.options.afterRender;
+      if (afterRender) {
+        When(rootViewDeferred.promise).then(invocation(view, afterRender, wire));
+      }
       view = normalizeView(view);
       app.renderAsRoot(view);
       return rootViewDeferred.resolve(view);
     };
     doRenderAsChild = function(facet, options, wire) {
-      var childView;
+      var afterRender, childView;
       childView = facet.target;
+      afterRender = facet.options.afterRender;
       childView = normalizeView(childView);
+      if (afterRender) {
+        When(childViewDeferred.promise).then(invocation(childView, afterRender, wire));
+      }
       return When(rootViewDeferred.promise).then(function(rootView) {
         $("<div class='" + facet.id + "Wrapper'></div>").appendTo(rootView.el);
         rootView.addRegion(facet.id + "Region", "." + facet.id + "Wrapper");
@@ -102,29 +82,11 @@ define(["when", "wire/lib/connection", "marionette", "underscore", "core/bootApp
         throw "rootView does not resolved, did you assigned renderAsRoot component?";
       });
     };
-    doAfterRenderAsRootFacet = function(facet, options, wire) {
-      var invoke, target;
-      target = facet.target;
-      invoke = facet.options.invoke;
-      return When(rootViewDeferred.promise).then(invokeRef(target, invoke, wire));
-    };
-    doAfterRenderAsChildFacet = function(facet, options, wire) {
-      var invoke, target;
-      target = facet.target;
-      invoke = facet.options.invoke;
-      return When(childViewDeferred.promise).then(invokeRef(target, invoke, wire));
-    };
     renderAsRootFacet = function(resolver, facet, wire) {
       return resolver.resolve(doRenderAsRoot(facet, options, wire));
     };
     renderAsChildFacet = function(resolver, facet, wire) {
       return resolver.resolve(doRenderAsChild(facet, options, wire));
-    };
-    afterRenderAsRootFacet = function(resolver, facet, wire) {
-      return resolver.resolve(doAfterRenderAsRootFacet(facet, options, wire));
-    };
-    afterRenderAsChildFacet = function(resolver, facet, wire) {
-      return resolver.resolve(doAfterRenderAsChildFacet(facet, options, wire));
     };
     return {
       context: {
@@ -135,16 +97,10 @@ define(["when", "wire/lib/connection", "marionette", "underscore", "core/bootApp
       },
       facets: {
         renderAsRoot: {
-          "ready:before": renderAsRootFacet
+          ready: renderAsRootFacet
         },
         renderAsChild: {
-          "ready:before": renderAsChildFacet
-        },
-        afterRenderAsRoot: {
-          "ready:after": afterRenderAsRootFacet
-        },
-        afterRenderAsChild: {
-          "ready:after": afterRenderAsChildFacet
+          ready: renderAsChildFacet
         }
       }
     };

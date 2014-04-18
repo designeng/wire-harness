@@ -14,9 +14,9 @@ define
                 module: 'text!modules/harness/sidebar.html'
             css: 
                 module: 'css!modules/harness/sidebarStructure.css'
-        renderAsChild: true
-        afterRenderAsChild:
-            invoke: {$ref: 'controller.afterChildLoad'}
+
+        renderAsChild:
+            afterRender: {$ref: 'controller.afterChildLoad'}
 
     harnessPlayground:
         render:
@@ -25,9 +25,8 @@ define
             css: 
                 module: 'css!modules/harness/structure.css'
 
-        renderAsRoot: true
-        afterRenderAsRoot:
-            invoke: {$ref: 'controller.loadHarness'}
+        renderAsRoot:
+            afterRender: {$ref: 'controller.loadHarness'}
 
     controller:
         create: 
